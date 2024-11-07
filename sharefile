@@ -1,0 +1,68 @@
+#! /usr/bin/python
+
+from http.server import SimpleHTTPRequestHandler, HTTPServer
+import requests
+import threading as th
+import random
+import sys
+import socket
+import os
+
+PORT = 8080
+nbPoints = 0
+content = ""
+lastUpdate = 0
+fileLog = "log.txt"
+
+class MyHandler(SimpleHTTPRequestHandler):
+
+	def do_GET(self):
+		global content
+		print(self.path)
+		if (self.path == "/" + url_str):
+			if(argcount == 2):
+				with open(sys.argv[1], 'rb') as file:
+					self.send_response(200)
+					self.send_header("Content-type", "text/plain")
+					self.send_header("Content-Disposition", f"attachment; filename={sys.argv[1]}")
+					self.end_headers()
+					contentStyle = file.read()
+					self.wfile.write(contentStyle)
+			if(argcount == 3):
+				with open(sys.argv[2], 'rb') as file:
+					self.send_response(200)
+					self.send_header("Content-type", "text/plain")
+					self.send_header("Content-Disposition", f"attachment; filename={sys.argv[2]}")
+					self.end_headers()
+					contentStyle = file.read()
+					self.wfile.write(contentStyle)
+		else:	
+			self.send_response(200)
+			self.send_header("Content-type", "text/html")
+			self.end_headers()
+			content = "no file"
+			self.wfile.write(content)
+
+def generateString():
+	arr = "abcdefghijklmnopqrstuvwxyz0123456789"
+	size = 64
+	i = 0
+	newStr = ""
+
+	while (i < size):
+		newStr += random.choice(arr)
+		i += 1
+	print(newStr)
+	return newStr;
+
+hostname = socket.gethostname()
+ip_address = socket.gethostbyname(hostname)
+argcount = len(sys.argv)
+print(ip_address)
+server_adress = (ip_address, PORT)
+url_str = generateString()
+print('msg -l ' + sys.argv[1] + ' http://' + ip_address + '/' + url_str)
+if(argcount == 3):
+	os.system(f'.local/bin/msg -l ' + sys.argv[1] + ' http://' + ip_address + ':8080/' + url_str)
+httpd = HTTPServer(server_adress, MyHandler)
+th.Thread(target=httpd.serve_forever).start()
